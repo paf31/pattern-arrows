@@ -29,7 +29,11 @@ import Control.Arrow ((***), (<+>))
 --
 -- A pattern is a Kleisli arrow for the @StateT Maybe@ monad. That is, patterns can fail, and can carry user-defined state.
 --
-newtype Pattern u a b = Pattern { runPattern :: A.Kleisli (StateT u Maybe) a b } deriving (C.Category, A.Arrow, A.ArrowZero, A.ArrowPlus)
+newtype Pattern u a b = Pattern { runPattern :: A.Kleisli (StateT u Maybe) a b } deriving (A.Arrow, A.ArrowZero, A.ArrowPlus)
+
+instance C.Category (Pattern u) where
+    id = Pattern (C.id)
+    Pattern p1 . Pattern p2 = Pattern (p1 C.. p2)
 
 instance Functor (Pattern u a) where
   fmap f (Pattern p) = Pattern $ A.Kleisli $ fmap f . A.runKleisli p
